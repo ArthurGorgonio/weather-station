@@ -144,7 +144,7 @@ void loop() {
     humi = dht.readHumidity();
     Serial.println("Temp = " + String(temp) + "ºC\t" +
                    "Humi = " + String(humi) + "%");
-    postStatus = write2TSData(dataTemp, String(int(temp)),
+    postStatus = write2TSData(dataTemp, String(temp),
                               dataHumi, String(humi));
     if (postStatus == 200) {
       Serial.println("The data was sent");
