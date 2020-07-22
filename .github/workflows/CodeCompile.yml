@@ -1,0 +1,56 @@
+# This is the name of the workflow, visible on GitHub UI.
+name: CI
+on:
+  push: # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
+    paths:
+    - '**.ino'
+    - '**.h'
+
+jobs:
+  build:
+    name: ${{ matrix.arduino-boards-fqbn }} - test compiling examples
+
+    runs-on: ubuntu-18.04
+
+    env:
+      # Comma separated list without double quotes around the list.
+      REQUIRED_LIBRARIES: Adafruit Sensor@1.1.4,ThingSpeak@1.5.0,DHT sensor library@1.3.10
+
+    strategy:
+      matrix:
+        arduino-boards-fqbn:
+          - esp32:esp32:featheresp32:FlashFreq=80
+
+        # Specify parameters for each board.
+        include:
+          - arduino-boards-fqbn: esp32:esp32:featheresp32:FlashFreq=80
+            platform-url: https://dl.espressif.com/dl/package_esp32_index.json
+            sketches-exclude: WhistleSwitch,50Hz,SimpleFrequencyDetector
+
+      # Do not cancel all jobs / architectures if one job fails
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+     # - name: Checkout custom library
+     #   uses: actions/checkout@v2
+     #   with:
+     #     repository: ArminJo/ATtinySerialOut
+     #     ref: master
+     #     path: CustomLibrary # must match the pattern *Custom*
+
+      # Test of the arduino-test-compile action
+      - name: Compile the repository code using the arduino-test-compile action
+        uses: ArminJo/arduino-test-compile@master
+        with:
+          arduino-board-fqbn: ${{ matrix.arduino-boards-fqbn }}
+          arduino-platform: ${{ matrix.arduino-platform }}
+          platform-url: ${{ matrix.platform-url }}
+          required-libraries: ${{ env.REQUIRED_LIBRARIES }}
+          sketches-exclude: ${{ matrix.sketches-exclude }}
+          examples-build-properties: ${{ toJson(matrix.build-properties) }}
+          sketch-names:
+            thingspeak.ino
+          sketch-names-find-start: test
