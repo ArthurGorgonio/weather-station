@@ -5,6 +5,10 @@ on:
     paths:
     - '**.ino'
     - '**.h'
+  pull_request:
+    paths:
+    - '**.ino'
+    - '**.h'
 
 jobs:
   build:
